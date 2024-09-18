@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Centering everything */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+
+        /* Header styling */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #333;
+        }
+
+        header p {
+            color: #666;
+        }
+
+        /* Main container styling */
+        main {
+            width: 100%;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        /* Input styling */
+        input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        /* Button styling */
+        button {
+            width: 30%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Show Data styling */
+        #showData {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .student-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafafa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Hello Dear Students</h1>
+        <p>Welcome to our website and please submit your information</p>
+    </header>
+    <main>
+        <form id="myInfo">
+            <input id="stName" type="text" placeholder="Enter Your Name">
+            <input id="dep" type="text" placeholder="Enter Your Department">
+            <button id="btn">Submit</button>
+        </form>
+        <div id="showData">
+            <!-- Student data will appear here -->
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfNOqo7HCyjielp_bZs9_-HHFz6-VaRks",
+            authDomain: "students-f45a8.firebaseapp.com",
+            projectId: "students-f45a8",
+            storageBucket: "students-f45a8.appspot.com",
+            messagingSenderId: "303716110044",
+            appId: "1:303716110044:web:33a88d0397d68745f26e19"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const myDatabase = getFirestore(app);
+
+        document.getElementById('btn').addEventListener('click', async function (e) {
+            e.preventDefault();
+            let name = document.getElementById('stName');
+            let stDep = document.getElementById('dep');
+            if (name.value === '' || stDep.value === '') {
+                alert("Please enter your information then try.");
+            } else {
+                try {
+                    await addDoc(collection(myDatabase, "student_info"), {
+                        student: name.value,
+                        department: stDep.value,
+                    });
+                    alert("Information added successfully.");
+                    infoColector();
+                    document.getElementById('myInfo').style.display = 'none';
+                    document.getElementById('showData').style.display = 'block';
+                } catch (error) {
+                    alert("Something went wrong.");
+                }
+            }
+        });
+
+        async function infoColector() {
+            const dataBox = document.getElementById('showData');
+            dataBox.innerHTML = ''; 
+            const snapshot = await getDocs(collection(myDatabase, 'student_info'));
+            const myDocuments = snapshot.docs;
+
+            for (let i = 0; i < myDocuments.length; i++) {
+                const dataFromDatabase = myDocuments[i].data();
+
+                const create = document.createElement('div');
+                create.className = 'student-entry';
+                create.innerHTML = `
+                    <div>Name: ${dataFromDatabase.student}</div>
+                    <div>Department: ${dataFromDatabase.department}</div>
+                `;
+                dataBox.appendChild(create);
+            }
+        }
+
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students Information Controller</title>
+    <style>
+        /* Center everything */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        #showData {
+            width: 50%;
+            text-align: center;
+        }
+
+        /* Styling the div rows */
+        .student-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: start;
+            color: #2762c2;
+        }
+
+        /* Delete button styling */
+        .delete-btn {
+            background-color: #ff4d4d;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #1a72ff;
+        }
+        .stuInfo{
+            text-align: center;
+            font-size: 40px;
+            color: #1a72ff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="stuInfo">Students Informations</h1>
+
+    <div id="showData"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfNOqo7HCyjielp_bZs9_-HHFz6-VaRks",
+            authDomain: "students-f45a8.firebaseapp.com",
+            projectId: "students-f45a8",
+            storageBucket: "students-f45a8.appspot.com",
+            messagingSenderId: "303716110044",
+            appId: "1:303716110044:web:33a88d0397d68745f26e19"
+        };
+
+       
+        const app = initializeApp(firebaseConfig);
+        const myDatabase = getFirestore(app);
+
+       
+        async function infoColector() {
+           try{
+            const dataBox = document.getElementById('showData');
+            dataBox.innerHTML = ''; 
+            const snapshot = await getDocs(collection(myDatabase, 'student_info'));
+            const myDocuments = snapshot.docs;
+
+            for (let i = 0; i < myDocuments.length; i++) {
+                const dataFromDatabase = myDocuments[i].data();
+                const stId = myDocuments[i].id;
+                const create = document.createElement('div');
+                create.classList.add('student-row');
+                create.innerHTML = `
+                    <div>
+                        <div><strong>Name:</strong> ${dataFromDatabase.student}</div>
+                        <div><strong>Department:</strong> ${dataFromDatabase.department}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteData('${stId}')">Delete</button>
+                `;
+                dataBox.appendChild(create);
+            }
+           }catch(error){
+                alert("somting worong")
+           }
+        }
+
+        
+        async function deleteData(stId) {
+            try {
+                await deleteDoc(doc(myDatabase, 'student_info', stId));
+                alert("Student deleted successfully!");
+                infoColector(); 
+            } catch (error) {
+                console.error("Error deleting document: ", error);
+                alert("Failed to delete student!");
+            }
+        }
+
+        window.deleteData = deleteData; 
+        infoColector();
+    </script>
+
+</body>
+
+</html>
